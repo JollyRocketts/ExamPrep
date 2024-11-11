@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Select OCR Mode</title>
+</head>
+<body>
+    <h1>Select OCR Mode</h1>
+    <form action="/process_image" method="post">
+        <input type="hidden" name="filename" value="{{ filename }}">
+        <label><input type="radio" name="ocr_option" value="Faster" required> Faster</label>
+        <label><input type="radio" name="ocr_option" value="Better Precision"> Better Precision</label>
+        <br><br>
+        <input type="submit" value="Process Image">
+    </form>
+</body>
+</html>

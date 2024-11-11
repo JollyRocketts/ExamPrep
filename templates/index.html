@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload the file or Submit a Link</title>
+    <script>
+        function toggleInputFields() {
+            const fileOption = document.getElementById('fileOption').checked;
+            const linkOption = document.getElementById('linkOption').checked;
+            const videoOption = document.getElementById('videoOption').checked;
+
+            document.getElementById('fileInput').style.display = fileOption ? 'block' : 'none';
+            document.getElementById('linkInput').style.display = linkOption ? 'block' : 'none';
+            document.getElementById('videoInput').style.display = videoOption ? 'block' : 'none';
+        }
+    </script>
+</head>
+<body>
+    <form action="/success" method="post" enctype="multipart/form-data">
+        <label><input type="radio" name="option" id="fileOption" value="file" onclick="toggleInputFields()" required> Upload File</label>
+        <label><input type="radio" name="option" id="linkOption" value="link" onclick="toggleInputFields()"> Submit Link</label>
+        <label><input type="radio" name="option" id="videoOption" value="video" onclick="toggleInputFields()"> YouTube Video</label>
+        
+        <div id="fileInput" style="display: none;">
+            <label for="file">Choose a file to upload:</label>
+            <input type="file" name="file" />
+        </div>
+        
+        <div id="linkInput" style="display: none;">
+            <label for="link">Enter a URL:</label>
+            <input type="url" name="link" placeholder="Enter a URL" />
+        </div>
+
+        <div id="videoInput" style="display: none;">
+            <label for="video">Enter YouTube Video URL:</label>
+            <input type="url" name="video" placeholder="Enter YouTube Video URL" />
+        </div>
+        
+        <br><br>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>

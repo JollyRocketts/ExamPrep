@@ -1,0 +1,1 @@
+A human interface iS the sum of all communication between the computer and user. The interface is not merely a visual display - in fact, it's possible to have no visual display at all.
