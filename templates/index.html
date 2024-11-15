@@ -4,11 +4,17 @@
     <title>Upload the file or Submit a Link</title>
     <script>
         function toggleInputFields() {
-            const fileOption = document.getElementById('fileOption').checked;
+            const imageOption = document.getElementById('imageOption').checked;
+            const pdfOption = document.getElementById('pdfOption').checked;
+            const pptOption = document.getElementById('pptOption').checked;
+            const docOption = document.getElementById('docOption').checked;
             const linkOption = document.getElementById('linkOption').checked;
             const videoOption = document.getElementById('videoOption').checked;
 
-            document.getElementById('fileInput').style.display = fileOption ? 'block' : 'none';
+            document.getElementById('imageInput').style.display = imageOption ? 'block' : 'none';
+            document.getElementById('pdfInput').style.display = pdfOption ? 'block' : 'none';
+            document.getElementById('pptInput').style.display = pptOption ? 'block' : 'none';
+            document.getElementById('docInput').style.display = docOption ? 'block' : 'none';
             document.getElementById('linkInput').style.display = linkOption ? 'block' : 'none';
             document.getElementById('videoInput').style.display = videoOption ? 'block' : 'none';
         }
@@ -16,13 +22,31 @@
 </head>
 <body>
     <form action="/success" method="post" enctype="multipart/form-data">
-        <label><input type="radio" name="option" id="fileOption" value="file" onclick="toggleInputFields()" required> Upload File</label>
+        <label><input type="radio" name="option" id="imageOption" value="image" onclick="toggleInputFields()" required> Upload Image</label>
+        <label><input type="radio" name="option" id="pdfOption" value="pdf" onclick="toggleInputFields()"> Upload PDF</label>
+        <label><input type="radio" name="option" id="pptOption" value="ppt" onclick="toggleInputFields()"> Upload PPT</label>
+        <label><input type="radio" name="option" id="docOption" value="doc" onclick="toggleInputFields()"> Upload DOC</label>
         <label><input type="radio" name="option" id="linkOption" value="link" onclick="toggleInputFields()"> Submit Link</label>
         <label><input type="radio" name="option" id="videoOption" value="video" onclick="toggleInputFields()"> YouTube Video</label>
         
-        <div id="fileInput" style="display: none;">
-            <label for="file">Choose a file to upload:</label>
+        <div id="imageInput" style="display: none;">
+            <label for="file">Choose an image to upload:</label>
             <input type="file" name="file" />
+        </div>
+        
+        <div id="pdfInput" style="display: none;">
+            <label for="pdf">Choose a PDF to upload:</label>
+            <input type="file" name="pdf" />
+        </div>
+        
+        <div id="pptInput" style="display: none;">
+            <label for="ppt">Choose a PPT to upload:</label>
+            <input type="file" name="ppt" />
+        </div>
+        
+        <div id="docInput" style="display: none;">
+            <label for="doc">Choose a DOC to upload:</label>
+            <input type="file" name="doc" />
         </div>
         
         <div id="linkInput" style="display: none;">
