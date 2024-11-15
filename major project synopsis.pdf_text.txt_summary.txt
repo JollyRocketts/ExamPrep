@@ -1,1 +1,0 @@
-The aim of this project is to develop a web application that assists students in summarizing study material and generating personalized quizzes for exam preparation.
