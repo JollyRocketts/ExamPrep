@@ -131,33 +131,46 @@ def success():
 def summarize():
     filename = request.form.get('filename')
     summary_type = request.form.get('summary_type')
+    summary_length = request.form.get('summary_length')
     
     with open(filename, 'r', encoding="utf-8") as file:
         text = file.read()
 
     max_input_length = 512  # Model's input token limit
-    max_output_length = 130  # Desired summary length
+
+    # Adjust summary length parameters based on user selection
+    if summary_length == 'short':
+        max_output_length = 50
+    elif summary_length == 'medium':
+        max_output_length = 130
+    elif summary_length == 'long':
+        max_output_length = 250
+    else:
+        max_output_length = 130  # Default to medium if no valid option
 
     # Truncate text if it exceeds the model's max input length
     truncated_text = text[:max_input_length]
 
     try:
         if summary_type == 'bart':
-            summary = bart_summarizer(truncated_text, max_length=max_output_length, min_length=30, do_sample=False)[0]['summary_text']
+            # summary = bart_summarizer(truncated_text, max_length=max_output_length, min_length=30, do_sample=False)[0]['summary_text']
+            summary = bart_summarizer(truncated_text, max_length=max_output_length, min_length=max_output_length // 2, do_sample=False)[0]['summary_text']
         elif summary_type == 'bert':
-            summary = bert_summarizer(truncated_text, max_length=max_output_length, min_length=30, do_sample=False)[0]['summary_text']
+            # summary = bert_summarizer(truncated_text, max_length=max_output_length, min_length=30, do_sample=False)[0]['summary_text']
+            summary = bert_summarizer(truncated_text, max_length=max_output_length, min_length=max_output_length // 2, do_sample=False)[0]['summary_text']
         else:
             summary = "Invalid summary type selected."
         
         summary_filename = f"{filename}_summary.txt"
-        with open(summary_filename, "w", encoding="utf-8") as summary_file:
+        with open(summary_filename, 'w', encoding = "utf-8") as summary_file:
             summary_file.write(summary)
         
-        message = f"Summary generated and saved to {summary_filename} using {summary_type.upper()}."
+        message = f"Summary generated and saved to {summary_filename} using {summary_type.upper()} with {summary_length} length."
     except Exception as e:
         message = f"Error during summarization: {e}"
     
     return render_template("ack.html", message=message)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

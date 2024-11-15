@@ -4,11 +4,17 @@
     <title>Select Summary Type</title>
 </head>
 <body>
-    <h2>Select Summary Type</h2>
+    <h2>Select Summary Options</h2>
     <form action="/summarize" method="post">
         <input type="hidden" name="filename" value="{{ filename }}">
         <label><input type="radio" name="summary_type" value="bert" required> Extractive (BERT)</label><br>
         <label><input type="radio" name="summary_type" value="bart"> Abstractive (BART)</label><br><br>
+        
+        <h3>Select Summary Length:</h3>
+        <label><input type="radio" name="summary_length" value="short" required> Short</label><br>
+        <label><input type="radio" name="summary_length" value="medium"> Medium</label><br>
+        <label><input type="radio" name="summary_length" value="long"> Long</label><br><br>
+        
         <input type="submit" value="Generate Summary">
     </form>
 </body>
