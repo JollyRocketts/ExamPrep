@@ -10,6 +10,7 @@
             const docOption = document.getElementById('docOption').checked;
             const linkOption = document.getElementById('linkOption').checked;
             const videoOption = document.getElementById('videoOption').checked;
+            const quizOption = document.getElementById('quizOption').checked;
 
             document.getElementById('imageInput').style.display = imageOption ? 'block' : 'none';
             document.getElementById('pdfInput').style.display = pdfOption ? 'block' : 'none';
@@ -17,6 +18,7 @@
             document.getElementById('docInput').style.display = docOption ? 'block' : 'none';
             document.getElementById('linkInput').style.display = linkOption ? 'block' : 'none';
             document.getElementById('videoInput').style.display = videoOption ? 'block' : 'none';
+            document.getElementById('txtInput').style.display = quizOption ? 'block' : 'none';
         }
     </script>
 </head>
@@ -28,10 +30,11 @@
         <label><input type="radio" name="option" id="docOption" value="doc" onclick="toggleInputFields()"> Upload DOC</label>
         <label><input type="radio" name="option" id="linkOption" value="link" onclick="toggleInputFields()"> Submit Link</label>
         <label><input type="radio" name="option" id="videoOption" value="video" onclick="toggleInputFields()"> YouTube Video</label>
+        <label><input type="radio" name="option" id="quizOption" value="quiz" onclick="toggleInputFields()" required>AI Quiz Generator</label>
         
         <div id="imageInput" style="display: none;">
             <label for="file">Choose an image to upload:</label>
-            <input type="file" name="file" />
+            <input type="file" name="image" />
         </div>
         
         <div id="pdfInput" style="display: none;">
@@ -57,6 +60,11 @@
         <div id="videoInput" style="display: none;">
             <label for="video">Enter YouTube Video URL:</label>
             <input type="url" name="video" placeholder="Enter YouTube Video URL" />
+        </div>
+
+        <div id="txtInput" style="display: none;">
+            <label for="quiz">Choose a TXT file to upload:</label>
+            <input type="file" name="quiz" />
         </div>
         
         <br><br>

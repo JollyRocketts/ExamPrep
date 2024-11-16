@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Quiz Generator</title>
+</head>
+<body>
+    <h1>Generate a Quiz</h1>
+    <form action="/generate_quiz" method="POST">
+        <input type="hidden" name="filename" value="{{ filename }}">
+        <label for="num_questions">Number of Questions:</label>
+        <input type="number" id="num_questions" name="num_questions" min="5" max="10" value="5" required>
+        <button type="submit">Generate Quiz</button>
+    </form>
+    <!-- <p>{{ filename }}</p> -->
+</body>
+</html>

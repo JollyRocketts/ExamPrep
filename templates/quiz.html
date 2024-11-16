@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz</title>
+</head>
+<body>
+    <h1>Your AI-Generated Quiz</h1>
+    <form action="/submit_quiz" method="POST">
+        {% for q in quiz %}
+        <div>
+            <p><strong>Q{{ loop.index }}:</strong> {{ q.question }}</p>
+            <ol type="A">
+                {% for option in q.options %}
+                <li>
+                    <input type="radio" name="q{{ loop.index }}" value="{{ option }}" required>
+                    {{ option }}
+                </li>
+                {% endfor %}
+            </ol>
+        </div>
+        {% endfor %}
+        <button type="submit">Submit Quiz</button>
+    </form>
+</body>
+</html>
