@@ -1,25 +1,69 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <title>Quiz</title>
-</head>
-<body>
-    <h1>Your AI-Generated Quiz</h1>
-    <form action="/submit_quiz" method="POST">
-        {% for q in quiz %}
-        <div>
-            <p><strong>Q{{ loop.index }}:</strong> {{ q.question }}</p>
-            <ol type="A">
-                {% for option in q.options %}
-                <li>
-                    <input type="radio" name="q{{ loop.index }}" value="{{ option }}" required>
-                    {{ option }}
-                </li>
-                {% endfor %}
-            </ol>
-        </div>
-        {% endfor %}
-        <button type="submit">Submit Quiz</button>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz AI</title>
+  </head>
+
+  <body>
+    <div class="container">
+        <section class="top">
+          <div class="container top">
+            <div>
+                <h3>Quiz</h3>
+            </div>
+          </div>
+        </section>
+        <section style="margin: 50px" class="mid">
+            {% if uploaded == true %}
+    <form action="/results" method="POST">
+      {% for i in range(size) %}
+      <section class="section-1" id="section-1">
+        <main>
+          <div class="scp-quizzes-main">
+            <div class="scp-quizzes-data">
+              <h4 class="is-size-6 has-text-weight-bold">
+                {{ i+1 }}. {{ questions[i+1]['question'] }}
+              </h4>
+              <br />
+              {% for op in questions[i+1]['options'] %} {% if op ==
+              questions[i+1]['answer'] %}
+              <input
+                type="radio"
+                id="{{ questions[i+1]['answer'] }}"
+                name="question{{ i+1 }}"
+                value="{{ op }}"
+              />
+              <label for="{{ questions[i+1]['answer'] }}"> {{ op }}</label
+              ><br />
+              {% else %}
+              <input type="radio" name="question{{ i+1 }}" />
+              <label> {{ op }}</label><br />
+              {% endif %} {% endfor %}
+            </div>
+          </div>
+        </main>
+      </section>
+      {% endfor %}
+      <div class="end">
+        <button
+          type="submit"
+          class="btn btn-primary btn-lg is-fullwidth"
+        >
+          Submit
+        </button>
+      </div>
     </form>
-</body>
+
+    {% else %}
+    <section class="section-1" id="section-1">
+      <h1>Could not upload file</h1>
+    </section>
+    {% endif %}
+        </section>
+       
+  </body>
 </html>
+

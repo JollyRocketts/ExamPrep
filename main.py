@@ -6,18 +6,13 @@ import requests
 from ocr_processing import process_image
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api.formatters import TextFormatter
-from quiz_generator import generate_quiz
+from workers import txt2questions
 
 app = Flask(__name__)
-app.secret_key = "Fg4bCUP3odF0ZvMgIS3wqJudc30Us0nv"
+app.secret_key = "secret_key"
 
-# Load summarization pipelines
 bart_summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
 bert_summarizer = pipeline("summarization", model="bert-base-uncased")
-
-# UPLOAD_FOLDER = 'uploads'
-# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-# os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
 @app.route('/')
@@ -35,25 +30,6 @@ def process_image_route():
         output_file.write(output_text)
     
     return render_template("select_summary.html", filename=output_filename)
-
-# @app.route('/upload', methods=['POST'])
-# def upload_file():
-#     if request.method == 'POST':
-#         option = request.form.get('option')
-#         file = request.files['file']
-
-#         if file and option:
-#             filename = secure_filename(file.filename)
-#             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-#             file.save(file_path)
-
-#             if option == 'quiz':
-#                 if not filename.endswith('.txt'):
-#                     return render_template("ack.html", message="Only text files are supported for quiz generation.")
-#                 return redirect(url_for('select_quiz', filename=filename))
-#             # Other options (e.g., image, link) remain as they are.
-
-#     return render_template("ack.html", message="Invalid file upload or option selected.")
 
 
 @app.route('/success', methods=['POST'])
@@ -131,25 +107,40 @@ def success():
                 message = f"Error processing the DOC file: {e}"
                 return render_template("ack.html", message=message)
 
-        # Handle PPT file upload
+        
         elif option == 'quiz' and 'quiz' in request.files and request.files['quiz'].filename != '':
+            UPLOAD_STATUS = False
+            global questions
+            questions = dict()
+
             quiz_file = request.files['quiz']
-            # print("\n\n\n\n\n")
-            # print("Quiz File?:", quiz_file)
-            # print("\n\n\n\n\n")
+            # # print("\n\n\n\n\n")
+            # # print("Quiz File?:", quiz_file)
+            # # print("\n\n\n\n\n")
             filename = quiz_file.filename
-            # print("\n\n\n\n\n")
-            # print("Filename:", filename)
-            # print("\n\n\n\n\n")
+            # # print("\n\n\n\n\n")
+            # # print("Filename:", filename)
+            # # print("\n\n\n\n\n")
             quiz_file.save(filename)
             try:
-                # extracted_text = textract.process(filename).decode('utf-8')
-                # text_filename = f"{filename}_text.txt"
-                # with open(filename, "w", encoding="utf-8") as text_file:
-                #     text_file.write(extracted_text)
-                # return render_template("select_summary.html", filename=filename)
-                # return redirect('/select_quiz/<filename>')
-                return render_template("select_quiz.html", filename=filename)
+                with open(filename, 'r') as file:
+                    text = file.read()
+
+                questions = txt2questions(text)
+                
+                print("\n\n\n\n\n")
+                print(questions)
+                print("\n\n\n\n\n")
+
+            # File upload + convert success
+                if text is not None:
+                    UPLOAD_STATUS = True
+
+                print("\n\n\n\n\n")
+                print("Reached Debug Point 1")
+                print("\n\n\n\n\n")
+                # return redirect("/quiz")
+                return render_template('quiz.html', uploaded=UPLOAD_STATUS, questions=questions, size=len(questions))
             except Exception as e:
                 message = f"Error processing the TXT file: {e}"
                 return render_template("ack.html", message=message)
@@ -189,54 +180,6 @@ def success():
         else:
             message = "Please select a valid option and submit the required information."
             return render_template("ack.html", message=message)
-
-
-# @app.route('/select_quiz/<filename>')
-# def select_quiz(filename):
-#     return render_template("select_quiz.html", filename=filename)
-
-
-@app.route('/generate_quiz', methods=['POST'])
-def generate_quiz_route():
-    filename = request.form.get('filename')
-    if not filename or not os.path.exists(filename):
-        return render_template("ack.html", message="The file for quiz generation was not found.")
-    
-    num_questions = int(request.form.get('num_questions', 5))  # Default to 5 questions
-    try:
-        with open(filename, 'r') as file:
-            text = file.read()
-
-        quiz = generate_quiz(text, num_questions)
-        session['quiz'] = quiz  # Store the quiz in the session for result evaluation
-        return render_template("quiz.html", quiz=quiz)
-    except Exception as e:
-        message = f"Error generating quiz: {e}"
-        return render_template("ack.html", message=message)
-
-
-
-@app.route('/submit_quiz', methods=['POST'])
-def submit_quiz():
-    user_answers = request.form.to_dict()
-    quiz = session.get('quiz', [])
-    results = []
-    score = 0
-
-    for i, q in enumerate(quiz):
-        user_answer = user_answers.get(f'q{i + 1}')
-        correct = user_answer == q['answer']
-        if correct:
-            score += 1
-        results.append({
-            "question": q['question'],
-            "user_answer": user_answer,
-            "correct_answer": q['answer'],
-            "correct": correct
-        })
-
-    total = len(quiz)
-    return render_template("results.html", score=score, total=total, results=results)
 
 
 
@@ -279,6 +222,57 @@ def summarize():
         message = f"Error during summarization: {e}"
 
     return render_template("ack.html", message=message)
+
+
+
+@app.route('/quiz', methods=['GET', 'POST'])
+def quiz():
+
+    UPLOAD_STATUS = False
+    questions = dict()
+
+    if request.method == 'POST':
+        print("\n\n\n\n\n")
+        print("Reached Debug Point 2")
+        print("\n\n\n\n\n")
+        try:
+            uploaded_file = request.files['quiz']
+            filename = uploaded_file.filename
+            uploaded_file.save(filename)
+
+            with open(filename, 'r') as file:
+                text = file.read()
+
+            questions = txt2questions(text)
+
+            print("\n\n\n\n\n")
+            print(text)
+            print("\n\n\n\n\n")
+
+            # File upload + convert success
+            if text is not None:
+                UPLOAD_STATUS = True
+        except Exception as e:
+            print("\n\n\n\n\nError caught:", e, "\n\n\n\n\n")
+    return render_template(
+        'quiz.html',
+        uploaded=UPLOAD_STATUS,
+        questions=questions,
+        size=len(questions)
+    )
+
+
+@app.route('/results', methods=['POST', 'GET'])
+def result():
+    # Count correct answers
+    correct_q = 0
+    for q_num, data in questions.items():
+        user_answer = request.form.get(f'question{q_num}')
+        print("\nUser answer: ", user_answer)
+        print("\nActual answer: ", data['answer'],"\n\n")
+        if user_answer == data['answer']:
+            correct_q += 1
+    return render_template('results.html', total=len(questions), correct=correct_q)
 
 
 if __name__ == '__main__':
