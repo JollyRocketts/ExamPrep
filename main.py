@@ -7,9 +7,10 @@ from ocr_processing import process_image
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api.formatters import TextFormatter
 from workers import txt2questions
+from pptx import Presentation
 
 app = Flask(__name__)
-app.secret_key = "secret_key"
+app.secret_key = "Fg4bCUP3odF0ZvMgIS3wqJudc30Us0nv"
 
 bart_summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
 bert_summarizer = pipeline("summarization", model="bert-base-uncased")
@@ -82,30 +83,36 @@ def success():
             pdf_file = request.files['pdf']
             filename = pdf_file.filename
             pdf_file.save(filename)
-            try:
-                extracted_text = textract.process(filename).decode('utf-8')
-                text_filename = f"{filename}_text.txt"
-                with open(text_filename, "w", encoding="utf-8") as text_file:
-                    text_file.write(extracted_text)
-                return render_template("select_summary.html", filename=text_filename)
-            except Exception as e:
-                message = f"Error processing the PDF file: {e}"
-                return render_template("ack.html", message=message)
+            if filename.lower().endswith(('pdf')):
+                try:
+                    extracted_text = textract.process(filename).decode('utf-8')
+                    text_filename = f"{filename}_text.txt"
+                    with open(text_filename, "w", encoding="utf-8") as text_file:
+                        text_file.write(extracted_text)
+                    return render_template("select_summary.html", filename=text_filename)
+                except Exception as e:
+                    message = f"Error processing the PDF file: {e}"
+                    return render_template("ack.html", message=message)
+            else:
+                return render_template("ack.html", message="File uploaded successfully but it is not a pdf.")
         
         # Handle DOC file upload
         elif option == 'doc' and 'doc' in request.files and request.files['doc'].filename != '':
             doc_file = request.files['doc']
             filename = doc_file.filename
             doc_file.save(filename)
-            try:
-                extracted_text = textract.process(filename).decode('utf-8')
-                text_filename = f"{filename}_text.txt"
-                with open(text_filename, "w", encoding="utf-8") as text_file:
-                    text_file.write(extracted_text)
-                return render_template("select_summary.html", filename=text_filename)
-            except Exception as e:
-                message = f"Error processing the DOC file: {e}"
-                return render_template("ack.html", message=message)
+            if filename.lower().endswith(('doc', 'docx')):
+                try:
+                    extracted_text = textract.process(filename).decode('utf-8')
+                    text_filename = f"{filename}_text.txt"
+                    with open(text_filename, "w", encoding="utf-8") as text_file:
+                        text_file.write(extracted_text)
+                    return render_template("select_summary.html", filename=text_filename)
+                except Exception as e:
+                    message = f"Error processing the DOC file: {e}"
+                    return render_template("ack.html", message=message)
+            else:
+                return render_template("ack.html", message="File uploaded successfully but it is not a doc.")
 
         
         elif option == 'quiz' and 'quiz' in request.files and request.files['quiz'].filename != '':
@@ -122,28 +129,33 @@ def success():
             # # print("Filename:", filename)
             # # print("\n\n\n\n\n")
             quiz_file.save(filename)
-            try:
-                with open(filename, 'r') as file:
-                    text = file.read()
 
-                questions = txt2questions(text)
-                
-                print("\n\n\n\n\n")
-                print(questions)
-                print("\n\n\n\n\n")
+            if filename.lower().endswith(('txt')):
+                try:
+                    with open(filename, 'r') as file:
+                        text = file.read()
 
-            # File upload + convert success
-                if text is not None:
-                    UPLOAD_STATUS = True
+                    questions = txt2questions(text)
+                    
+                    # print("\n\n\n\n\n")
+                    # print(questions)
+                    # print("\n\n\n\n\n")
 
-                print("\n\n\n\n\n")
-                print("Reached Debug Point 1")
-                print("\n\n\n\n\n")
-                # return redirect("/quiz")
-                return render_template('quiz.html', uploaded=UPLOAD_STATUS, questions=questions, size=len(questions))
-            except Exception as e:
-                message = f"Error processing the TXT file: {e}"
-                return render_template("ack.html", message=message)
+                # File upload + convert success
+                    if text is not None:
+                        UPLOAD_STATUS = True
+
+                    # print("\n\n\n\n\n")
+                    # print("Reached Debug Point 1")
+                    # print("\n\n\n\n\n")
+
+                    # return redirect("/quiz")
+                    return render_template('quiz.html', uploaded=UPLOAD_STATUS, questions=questions, size=len(questions))
+                except Exception as e:
+                    message = f"Error processing the TXT file: {e}"
+                    return render_template("ack.html", message=message)
+            else:
+                return render_template("ack.html", message="File uploaded successfully but it is not a text file.")
         
         # Handle YouTube video URL
         elif option == 'video' and request.form.get('video'):
@@ -167,15 +179,48 @@ def success():
             ppt_file = request.files['ppt']
             filename = ppt_file.filename
             ppt_file.save(filename)
-            try:
-                extracted_text = textract.process(filename).decode('utf-8')
-                text_filename = f"{filename}_text.txt"
-                with open(text_filename, "w", encoding="utf-8") as text_file:
-                    text_file.write(extracted_text)
-                return render_template("select_summary.html", filename=text_filename)
-            except Exception as e:
-                message = f"Error processing the PPT file: {e}"
-                return render_template("ack.html", message=message)
+
+            if filename.lower().endswith(('pptx')):
+
+                def extract_text_from_ppt(filename):
+                    prs = Presentation(filename)
+                    text = []
+                    for slide in prs.slides:
+                        for shape in slide.shapes:
+                            if shape.has_text_frame:
+                                for paragraph in shape.text_frame.paragraphs:
+                                    text.append(paragraph.text)
+                    return "\n".join(text)
+
+                try:
+                    extracted_text = extract_text_from_ppt(filename)
+                    text_filename = f"{filename}_text.txt"
+                    print(text_filename, "\n\n\n")
+                    with open(text_filename, "w", encoding="utf-8") as text_file:
+                        text_file.write(extracted_text)
+                    return render_template("select_summary.html", filename=text_filename)
+                except Exception as e:
+                    message = f"Error processing the PPT file: {e}"
+                    return render_template("ack.html", message=message)
+                # except Exception as e:
+                #     message = f"Error processing the PPT file: {e}"
+
+                
+                # print("\n\n\n", filename, "\n\n\n")
+                
+                # try:
+                #     extracted_text = textract.process(filename).decode('utf-8')
+                #     text_filename = f"{filename}_text.txt"
+                #     print(text_filename, "\n\n\n")
+                #     with open(text_filename, "w", encoding="utf-8") as text_file:
+                #         text_file.write(extracted_text)
+                #     return render_template("select_summary.html", filename=text_filename)
+                # except Exception as e:
+                #     message = f"Error processing the PPT file: {e}"
+                #     return render_template("ack.html", message=message)
+            
+            else:
+                return render_template("ack.html", message="File uploaded successfully but it is not in the form of pptx. Please make sure it is a .pptx file")
 
         else:
             message = "Please select a valid option and submit the required information."
